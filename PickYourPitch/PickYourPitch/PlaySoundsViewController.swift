@@ -41,6 +41,8 @@ class PlaySoundsViewController: UIViewController {
         }
         
         setUserInterfaceToPlayMode(false)
+        
+        sliderView.value = NSUserDefaults.standardUserDefaults().floatForKey(SliderValueKey)
     }
     
     func setUserInterfaceToPlayMode(isPlayMode: Bool) {
@@ -53,6 +55,8 @@ class PlaySoundsViewController: UIViewController {
         
         // Get the pitch from the slider
         let pitch = sliderView.value
+        
+        NSUserDefaults.standardUserDefaults().setFloat(pitch, forKey: SliderValueKey)
         
         // Play the sound
         playAudioWithVariablePitch(pitch)
@@ -84,7 +88,9 @@ class PlaySoundsViewController: UIViewController {
         
         audioPlayerNode.scheduleFile(audioFile, atTime: nil) {
             // When the audio completes, set the user interface on the main thread
-            dispatch_async(dispatch_get_main_queue()) {self.setUserInterfaceToPlayMode(false) }
+            dispatch_async(dispatch_get_main_queue()) {
+                self.setUserInterfaceToPlayMode(false)
+            }
         }
         
         do {
@@ -97,6 +103,6 @@ class PlaySoundsViewController: UIViewController {
     
     @IBAction func sliderDidMove(sender: UISlider) {
         // Do nothing?
-        print("Slider value: \(sliderView.value)")
+//        print("Slider value: \(sliderView.value)")
     }
 }

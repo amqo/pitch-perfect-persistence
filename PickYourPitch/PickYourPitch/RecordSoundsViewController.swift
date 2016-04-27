@@ -17,16 +17,28 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
     
     var audioRecorder:AVAudioRecorder!
     var recordedAudio:RecordedAudio!
+    
     var shouldSegueToSoundPlayer = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if NSFileManager.defaultManager().fileExistsAtPath(audioFileURL().path!) {
+            shouldSegueToSoundPlayer = true
+        }
     }
     
     override func viewWillAppear(animated: Bool) {
         //Hide the stop button
         stopButton.hidden = true
         recordButton.enabled = true
+        
+        if (shouldSegueToSoundPlayer) {
+            shouldSegueToSoundPlayer = false
+            let url = audioFileURL()
+            recordedAudio = RecordedAudio(filePathUrl: url.filePathURL, title: url.pathExtension)
+            self.performSegueWithIdentifier("stopRecording", sender: self)
+        }
     }
 
     @IBAction func recordAudio(sender: UIButton) {
@@ -43,10 +55,7 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         }
         
         // Create the path to the file.
-        let filename = "usersVoice.wav"
-        let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
-        let pathArray = [dirPath, filename]
-        let fileURL =  NSURL.fileURLWithPathComponents(pathArray)!
+        let fileURL =  audioFileURL()
 
         // Initialize and prepare the recorder
         do {
@@ -60,6 +69,15 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         audioRecorder.record()
     }
     
+    func audioFileURL() ->  NSURL {
+        let filename = "usersVoice.wav"
+        let dirPath = NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0] as String
+        let pathArray = [dirPath, filename]
+        let fileURL =  NSURL.fileURLWithPathComponents(pathArray)!
+        
+        return fileURL
+    }
+    
     func audioRecorderDidFinishRecording(recorder: AVAudioRecorder, successfully flag: Bool) {
 
         if flag {
@@ -68,6 +86,7 @@ class RecordSoundsViewController: UIViewController, AVAudioRecorderDelegate {
         } else {
             print("Recording was not successful")
             recordButton.enabled = true
+            recordingInProgress.hidden = true
             stopButton.hidden = true
         }
     }
